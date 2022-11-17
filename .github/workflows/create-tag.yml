@@ -14,6 +14,7 @@ on:
         value: ${{ jobs.create_tag.outputs.repo }}
       target:
         description: "On which environment will the tag be used"
+        value: ${{ jobs.create_tag.outputs.target }}
 
 jobs:
   create_tag:
