@@ -1,0 +1,57 @@
+# This workflow will set a generate a new tag for the service that needs to be deployed
+
+name: Create tag
+
+on:
+  workflow_call:
+    # Map the workflow outputs to job outputs
+    outputs:
+      tag:
+        description: "The tag that has been generated for the current build"
+        value: ${{ jobs.create_tag.outputs.tag }}
+      repo: 
+        description: "The repo that hosts the service to be deployed"
+        value: ${{ jobs.create_tag.outputs.repo }}
+      repo_short: 
+        description: "The repo's short name that hosts the service to be deployed"
+        value: ${{ jobs.create_tag.outputs.repo_short }}
+
+jobs:
+  create_tag:
+    runs-on: ubuntu-latest
+
+    # Map the job outputs to step outputs
+    outputs:
+      tag: ${{ steps.create-tag.outputs.tag }}
+      repo: ${{ steps.create-tag.outputs.repo }}
+      repo_short: ${{ steps.create-tag.outputs.repo_short }}
+    
+    steps:
+      - id: create-tag
+        run: |
+          if [[ ${GITHUB_REF_TYPE} == 'tag' ]]; then
+            
+            # RC OR PRODUCTION BUILD MODE
+            GIT_TAG=$(echo ${GITHUB_REF_NAME})
+          else
+            
+            # DEVELOP / QA BUILD MODE
+            # If branch name is feature/myfeature, only extract "myfeature"
+            
+            GIT_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | awk -F'/' '{ print $NF}')
+            GIT_TAG=$(echo ${GITHUB_REF#refs/heads/} | awk -F'/' '{ print $NF}')
+            # !!! SECURITY MEASURE: WE DON'T TRIGGER A DEPLOY IF PUSHING ON THE MAIN BRANCH
+            # !!! CREATE A RELEASE INSTEAD
+            # if [[ $GIT_BRANCH == 'master' || $GIT_BRANCH == 'main' ]]; then
+            #   echo "Workflow run on master/main branch, aborting."
+            #   exit 1
+            # fi
+          fi
+          REPO=$(echo ${GITHUB_REPOSITORY} | awk -F'/' '{ print $NF}')
+          REPO_SHORT=$(echo ${REPO} | awk -F'service-' '{ print $NF}')
+          echo "GIT_TAG: ${GIT_TAG}"
+          echo "REPO: ${REPO}"
+          echo "REPO_SHORT: ${REPO_SHORT}"
+          echo "tag=$GIT_TAG" >> $GITHUB_OUTPUT
+          echo "repo=$REPO" >> $GITHUB_OUTPUT
+          echo "repo_short=$REPO_SHORT" >> $GITHUB_OUTPUT
