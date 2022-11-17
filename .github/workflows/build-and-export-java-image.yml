@@ -17,10 +17,8 @@ on:
     secrets:
       token:
         required: true
-       slack_webhook: 
+      slack_webhook: 
         required: true
-    # Map the workflow outputs to job outputs
-    outputs:
       
 
 jobs:
