@@ -1,0 +1,110 @@
+# This workflow will build an image of a service and export it to the github workspace
+
+name: Build and export Java image
+
+on:
+  workflow_call:
+    inputs:
+      repo: 
+        required: true
+        type: string
+      target:
+        required: true
+        type: string
+      maven_pkg:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+       slack_webhook: 
+        required: true
+    # Map the workflow outputs to job outputs
+    outputs:
+      
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+      - name: Checkout source code
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+          token: ${{ secrets.token }}
+    
+      - name: Map environment variables
+        id: map-environment-variables
+        uses: kanga333/variable-mapper@master
+        with:
+          key: "${{ inputs.target }}"
+          map: |
+            {
+              "preprod": {
+                "environment": "RC",
+                "repo_name": "gekko-holding/${{ inputs.repo }}",
+                "slack_webhook_url" : "${{ secrets.slack_webhook }}"
+              },
+              "develop": {
+                "environment": "QA",
+                "repo_name": "gekko-holding/${{ inputs.repo }}",
+                "slack_webhook_url": "${{ secrets.slack_webhook }}"
+              }
+            }
+       
+      - name: Send notification to Slack
+        id: send-notification-to-slack
+        uses: slackapi/slack-github-action@v1.18.0
+        with:
+          # For posting a rich message using Block Kit
+          payload: |
+            {
+              "text": "Build started for `${{ env.environment }}` on `${{ inputs.repo }}`",
+              "blocks": [
+                  {
+                      "type": "section",
+                      "text": {
+                          "type": "mrkdwn",
+                          "text": "*${{ github.actor }}* started the <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}?check_suite_focus=true|deployment> on `${{ env.environment }}` env for `${{ inputs.repo }}` ${{ github.ref_type }} `${{github.ref_name}}`"
+                      }
+                  }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.slack_webhook_url }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          
+      - name: Set up JDK 11
+        id: setup-jdk
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          
+      - name: Check pom version
+        id: check-pom-version
+        uses: avides/actions-project-version-check@v1.3.0
+        with:
+          token: ${{ secrets.token }}
+          file-to-check: pom.xml
+          only-return-version: true
+          
+      - name: Use POM version from check
+        id: use-version-from-check
+        run:
+          echo "pom-version:" ${{steps.check-pom-version.outputs.version}}
+          
+      - name: Setup Maven package
+        id: setup-maven-package
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          repositories: '[{ "id": "github", "url": "${{ inputs.maven_pkg }}" }]'
+          servers: '[{ "id": "github", "username": "gekko-tech", "password": "${{ secrets.token }}" }]'
+
+      - name: Build with Maven
+        id: maven-build
+        run:
+          mvn -DskipTests clean install --file pom.xml
