@@ -47,7 +47,7 @@ jobs:
             GIT_TAG=$(echo ${GITHUB_REF#refs/heads/} | awk -F'/' '{ print $NF}')
             TARGET="develop"
             
-            GIT_TAG+=NOW
+            GIT_TAG+=$NOW
             
             # !!! SECURITY MEASURE: WE DON'T TRIGGER A DEPLOY IF PUSHING ON THE MAIN BRANCH
             if [[ $GIT_BRANCH == 'master' || $GIT_BRANCH == 'main' ]]; then
