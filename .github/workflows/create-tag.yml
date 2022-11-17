@@ -33,9 +33,7 @@ jobs:
             
             # RC OR PRODUCTION BUILD MODE
             
-            NOW=$(date '+%Y%m%d%H%M%S')
-            
-            GIT_TAG=$(echo ${GITHUB_REF_NAME}-${NOW})
+            GIT_TAG=$(echo ${GITHUB_REF_NAME})
             TARGET="preprod"
             
           else
@@ -43,9 +41,13 @@ jobs:
             # DEVELOP / QA BUILD MODE
             # If branch name is feature/myfeature, only extract "myfeature"
             
+            NOW=$(date '+%Y%m%d%H%M%S')
+            
             GIT_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | awk -F'/' '{ print $NF}')
             GIT_TAG=$(echo ${GITHUB_REF#refs/heads/} | awk -F'/' '{ print $NF}')
             TARGET="develop"
+            
+            GIT_TAG+=NOW
             
             # !!! SECURITY MEASURE: WE DON'T TRIGGER A DEPLOY IF PUSHING ON THE MAIN BRANCH
             if [[ $GIT_BRANCH == 'master' || $GIT_BRANCH == 'main' ]]; then
