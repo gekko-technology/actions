@@ -33,7 +33,9 @@ jobs:
             
             # RC OR PRODUCTION BUILD MODE
             
-            GIT_TAG=$(echo ${GITHUB_REF_NAME})
+            NOW=$(date '+%Y%m%d%H%M%S')
+            
+            GIT_TAG=$(echo ${GITHUB_REF_NAME}-${NOW})
             TARGET="preprod"
             
           else
