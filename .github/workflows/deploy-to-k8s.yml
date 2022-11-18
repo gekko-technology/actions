@@ -11,14 +11,17 @@ on:
       image:
         required: true
         type: string 
-    secrets:
-      git_token:
-        required: true
       dh_registry:
         required: true
+        type: string
       dh_repository:
         required: true
+        type: string
       deploy_file:
+        required: true
+        type: string
+    secrets:
+      git_token:
         required: true
       
 
@@ -39,8 +42,8 @@ jobs:
       - name: Replace image in the deployment file
         env:
           IMAGE_TAG: ${{ inputs.image }}
-          DH_REPOSITORY: ${{ secrets.dockerhub_repository }}
-          DEPLOY_FILE: ${{ secrets.deploy_file }}
+          DH_REPOSITORY: ${{ inputs.dockerhub_repository }}
+          DEPLOY_FILE: ${{ inputs.deploy_file }}
         run: |
             sed -i 's/${{env.DH_REPOSITORY}}.*/${{env.DH_REPOSITORY}}:${{env.IMAGE_TAG}}/g' ${{ env.DEPLOY_FILE }}
             git config user.name github-actions
