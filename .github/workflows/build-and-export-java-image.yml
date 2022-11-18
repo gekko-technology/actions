@@ -14,6 +14,9 @@ on:
       tag: 
         required: true
         type: string
+      dh_registry: 
+        required: true
+        type: string
     secrets:
       git_token:
         required: true
@@ -102,7 +105,8 @@ jobs:
         env:
           IMAGE_TAG: ${{ inputs.tag }}
           DH_REGISTRY: ${{ secrets.dockerhub_registry }}
-          DH_REPOSITORY: ${{ secrets.dockerhub_repository }}
+          #DH_REPOSITORY: ${{ secrets.dockerhub_repository }}
+          DH_REPOSITORY: ${{ inputs.dh_repository }}
         run : |
           echo "Pushing image to DockerHub... $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG"
           docker build -t $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG --pull=true --file=./Dockerfile ${{github.workspace}}
