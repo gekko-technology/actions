@@ -14,19 +14,16 @@ on:
       tag: 
         required: true
         type: string
-      dh_repository: 
-        required: true
-        type: string
     secrets:
       git_token:
         required: true
-      dockerhub_username:
+      dh_username:
         required: true
-      dockerhub_token:
+      dh_token:
         required: true
-      dockerhub_registry:
+      dh_registry:
         required: true
-      dockerhub_repository:
+      dh_repository:
         required: true
     outputs:
       image:
@@ -97,16 +94,15 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v1 
         with:
-          username: ${{ secrets.dockerhub_username }}
-          password: ${{ secrets.dockerhub_token }}
+          username: ${{ secrets.dh_username }}
+          password: ${{ secrets.dh_token }}
 
       - name: Build, tag and push the image to DockerHub
         id: build-image-service
         env:
           IMAGE_TAG: ${{ inputs.tag }}
-          DH_REGISTRY: ${{ secrets.dockerhub_registry }}
-          #DH_REPOSITORY: ${{ secrets.dockerhub_repository }}
-          DH_REPOSITORY: ${{ inputs.dh_repository }}
+          DH_REGISTRY: ${{ secrets.dh_registry }}
+          DH_REPOSITORY: ${{ secrets.dh_repository }}
         run : |
           echo "Pushing image to DockerHub... $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG"
           docker build -t $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG --pull=true --file=./Dockerfile ${{github.workspace}}
