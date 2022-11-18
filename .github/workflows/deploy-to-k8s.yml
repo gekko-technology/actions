@@ -42,7 +42,7 @@ jobs:
       - name: Replace image in the deployment file
         env:
           IMAGE_TAG: ${{ inputs.image }}
-          DH_REPOSITORY: ${{ inputs.dockerhub_repository }}
+          DH_REPOSITORY: ${{ inputs.dh_repository }}
           DEPLOY_FILE: ${{ inputs.deploy_file }}
         run: |
             sed -i 's/${{env.DH_REPOSITORY}}.*/${{env.DH_REPOSITORY}}:${{env.IMAGE_TAG}}/g' ${{ env.DEPLOY_FILE }}
