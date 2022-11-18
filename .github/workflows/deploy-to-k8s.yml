@@ -17,9 +17,9 @@ on:
     secrets:
       git_token:
         required: true
-      dockerhub_registry:
+      dh_registry:
         required: true
-      dockerhub_repository:
+      dh_repository:
         required: true
       deploy_file:
         required: true
