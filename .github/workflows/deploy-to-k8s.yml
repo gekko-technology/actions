@@ -21,7 +21,7 @@ on:
         required: true
       dockerhub_repository:
         required: true
-      deploy_app_name:
+      deploy_file:
         required: true
       
 
@@ -54,7 +54,7 @@ jobs:
           ENVIRONNEMENT: ${{ inputs.target == 'develop' && 'QA' || 'RC' }}
           IMAGE_TAG: ${{ inputs.image }}
           DH_REPOSITORY: ${{ secrets.dockerhub_repository }}
-          SVC_NAME: ${{ secrets.deploy_app_name }}
+          SVC_NAME: ${{ secrets.deploy_file }}
         run: |
             sed -i 's/${{env.DH_REPOSITORY}}.*/${{env.DH_REPOSITORY}}:${{env.IMAGE_TAG}}/g' B2C/${{env.ENVIRONNEMENT}}/MS/${{env.SVC_NAME}}/${{env.SVC_NAME}}-deployment.yaml
             git config user.name github-actions
