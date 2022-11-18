@@ -25,6 +25,10 @@ on:
         required: true
       dockerhub_repository:
         required: true
+    outputs:
+      image:
+        description: "The image name that has been generated and uploaded to dockerhub"
+        value: ${{ jobs.build.outputs.image }}
       
 
 jobs:
@@ -104,5 +108,4 @@ jobs:
           docker build -t $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG --pull=true --file=./Dockerfile ${{github.workspace}}
           docker push $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG
           
-          # echo "::set-output name=image::$DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG"
           echo "image=$DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
