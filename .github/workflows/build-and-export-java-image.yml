@@ -8,10 +8,10 @@ on:
       repo: 
         required: true
         type: string
-      target:
+      maven_pkg:
         required: true
         type: string
-      maven_pkg:
+      tag: 
         required: true
         type: string
     secrets:
