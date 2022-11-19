@@ -1,0 +1,46 @@
+# This workflow will get the last image deployed on the preprod environment and
+# trigger a deploy to the production environment
+
+name: Deploy an image to prod repository
+
+on:
+  workflow_call:
+    inputs:
+      repo: 
+        required: true
+        type: string
+      tag: 
+        required: true
+        type: string
+    secrets:
+      git_token:
+        required: true
+      dh_username:
+        required: true
+      dh_token:
+        required: true
+      dh_registry:
+        required: true
+      dh_repository:
+        required: true      
+
+jobs:
+  deploy:
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+    
+      - name: Move image from Preprod to Prod in DockerHub
+        env:
+          dh_registry: ${{ inputs.dh_registry }}
+          dh_preprod_repository: ${{ inputs.dh_repository }}
+          image: ${{ inputs.tag }}
+        if: ( inputs.TEST_MODE != true )
+        run: |
+          echo "Pull image from DockerHub..."
+          docker pull $dh_registry/$dh_preprod_repository:$image
+          echo "Tag new prod image"
+          docker tag $dh_registry/dh_preprod_repository:$image $dh_registry/dh_prod_repository:$image
+          echo "Push image to prod repository"
+          docker push $dh_registry/dh_prod_repository:$image
