@@ -61,7 +61,7 @@ jobs:
           DH_REPOSITORY: ${{ secrets.dh_repository }}
         run : |
           echo "Pushing image to DockerHub... $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG"
-          docker build -t $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG --pull=true --file=./Dockerfile ${{github.workspace}}
+          docker build -t $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG --pull=true --no-cache=true --file=./Dockerfile ${{github.workspace}}
           docker push $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG
           
           echo "image:$IMAGE_TAG"
