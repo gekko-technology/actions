@@ -18,8 +18,10 @@ on:
         required: true
       dh_registry:
         required: true
-      dh_repository:
-        required: true      
+      dh_preprod_repository:
+        required: true
+      dh_prod_repository:
+        required: true
 
 jobs:
   deploy:
@@ -31,12 +33,13 @@ jobs:
       - name: Move image from Preprod to Prod in DockerHub
         env:
           dh_registry: ${{ inputs.dh_registry }}
-          dh_preprod_repository: ${{ inputs.dh_repository }}
+          dh_preprod_repository: ${{ inputs.dh_preprod_repository }}
+          dh_prod_repository: ${{ inputs.dh_prod_repository }}
           image: ${{ inputs.tag }}
         run: |
           echo "Pull image from DockerHub..."
           docker pull $dh_registry/$dh_preprod_repository:$image
           echo "Tag new prod image"
-          docker tag $dh_registry/dh_preprod_repository:$image $dh_registry/dh_prod_repository:$image
+          docker tag $dh_registry/$dh_preprod_repository:$image $dh_registry/$dh_prod_repository:$image
           echo "Push image to prod repository"
-          docker push $dh_registry/dh_prod_repository:$image
+          docker push $dh_registry/$dh_prod_repository:$image
