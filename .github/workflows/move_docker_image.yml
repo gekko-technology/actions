@@ -33,7 +33,6 @@ jobs:
           dh_registry: ${{ inputs.dh_registry }}
           dh_preprod_repository: ${{ inputs.dh_repository }}
           image: ${{ inputs.tag }}
-        if: ( inputs.TEST_MODE != true )
         run: |
           echo "Pull image from DockerHub..."
           docker pull $dh_registry/$dh_preprod_repository:$image
