@@ -74,6 +74,12 @@ jobs:
           repositories: '[{ "id": "github", "url": "${{ inputs.maven_pkg }}" }]'
           servers: '[{ "id": "github", "username": "gekko-tech", "password": "${{ secrets.git_token }}" }]'
 
+      - name: Get Maven version
+        id: get_mvn_version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "maven version: $VERSION"
+
       - name: Build with Maven
         id: maven-build
         run:
