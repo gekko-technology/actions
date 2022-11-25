@@ -9,6 +9,12 @@ on:
       tag: 
         required: true
         type: string
+      dh_preprod_repository:
+        type: string
+        required: true
+      dh_prod_repository:
+        type: string
+        required: true
     secrets:
       dh_username:
         required: true
@@ -16,10 +22,7 @@ on:
         required: true
       dh_registry:
         required: true
-      dh_preprod_repository:
-        required: true
-      dh_prod_repository:
-        required: true
+      
 
 jobs:
   deploy:
@@ -48,9 +51,9 @@ jobs:
           image: ${{ inputs.tag }}
         run: |
           echo "Pull image from DockerHub..."
-          # docker pull $dh_registry/$dh_preprod_repository:$image
-          docker pull gekkogroup/r23-rc-api-gateway-b2c:v1.0.28
-          echo "Tag new prod image"
+          docker pull gekkogroup/$dh_preprod_repository:$image
+          #docker pull gekkogroup/r23-rc-api-gateway-b2c:v1.0.28
+          #echo "Tag new prod image"
           #docker tag $dh_registry/$dh_preprod_repository:$image $dh_registry/$dh_prod_repository:$image
           #echo "Push image to prod repository"
           #docker push $dh_registry/$dh_prod_repository:$image
