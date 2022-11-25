@@ -10,8 +10,6 @@ on:
         required: true
         type: string
     secrets:
-      git_token:
-        required: true
       dh_username:
         required: true
       dh_token:
