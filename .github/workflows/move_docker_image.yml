@@ -49,7 +49,7 @@ jobs:
         run: |
           echo "Pull image from DockerHub..."
           # docker pull $dh_registry/$dh_preprod_repository:$image
-          docker pull index.docker.io/gekkogroup/r23-rc-api-gateway-b2c:v1.0.28
+          docker pull gekkogroup/r23-rc-api-gateway-b2c:v1.0.28
           echo "Tag new prod image"
           #docker tag $dh_registry/$dh_preprod_repository:$image $dh_registry/$dh_prod_repository:$image
           #echo "Push image to prod repository"
