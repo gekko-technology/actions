@@ -77,7 +77,7 @@ jobs:
       - name: Get Maven version
         id: get_mvn_version
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          VERSION=$(mvn -v)
           echo "maven version: $VERSION"
 
       - name: Build with Maven
