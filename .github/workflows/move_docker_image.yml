@@ -9,6 +9,9 @@ on:
       tag: 
         required: true
         type: string
+      dh_registry:
+        type: string
+        required: true
       dh_preprod_repository:
         type: string
         required: true
@@ -22,7 +25,6 @@ on:
         required: true
       dh_registry:
         required: true
-      
 
 jobs:
   deploy:
