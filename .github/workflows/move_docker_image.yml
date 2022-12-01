@@ -23,8 +23,6 @@ on:
         required: true
       dh_token:
         required: true
-      dh_registry:
-        required: true
 
 jobs:
   deploy:
