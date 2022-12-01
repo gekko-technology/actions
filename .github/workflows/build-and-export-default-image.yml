@@ -11,6 +11,9 @@ on:
       tag: 
         required: true
         type: string
+      env:
+        required: true
+        type: string
     secrets:
       git_token:
         required: true
@@ -58,7 +61,8 @@ jobs:
           DH_REPOSITORY: ${{ secrets.dh_repository }}
         run : |
           echo "Pushing image to DockerHub... $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG"
-          docker build -t $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG --pull=true --no-cache=true --file=./Dockerfile ${{github.workspace}}
+          echo "Environment: ${{ inputs.env }}"
+          docker build -t $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG --pull=true --no-cache=true --file=./Dockerfile ${{ github.workspace }} --build-arg env=${{ inputs.env }}
           docker push $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG
           
           echo "image:$IMAGE_TAG"
