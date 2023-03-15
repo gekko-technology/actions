@@ -92,7 +92,7 @@ jobs:
           TAG: ${{ inputs.tag }}
         run: |
           mkdir upload/
-          ls -laG ${{github.workspace}}/target
+          ls -laG /home/runner/work/ggl-api-gateway/target
           cp ${{github.workspace}}/target/${{env.MICROSERVICE}}-${{steps.check-pom-version.outputs.version}}.jar upload/${{env.MICROSERVICE}}-${{env.TAG}}.jar
           
       - name: Set up QEMU
