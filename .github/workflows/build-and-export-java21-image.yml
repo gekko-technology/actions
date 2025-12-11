@@ -1,0 +1,122 @@
+# This workflow will build an image of a service and export it to the github workspace
+
+name: Build and export Java image
+
+on:
+  workflow_call:
+    inputs:
+      repo: 
+        required: true
+        type: string
+      maven_pkg:
+        required: true
+        type: string
+      tag: 
+        required: true
+        type: string
+    secrets:
+      git_token:
+        required: true
+      dh_username:
+        required: true
+      dh_token:
+        required: true
+      dh_registry:
+        required: true
+      dh_repository:
+        required: true
+    outputs:
+      image:
+        description: "The image name that has been generated and uploaded to dockerhub"
+        value: ${{ jobs.build.outputs.image }}
+      
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    outputs: 
+      image: ${{ steps.build-image-service.outputs.image }}
+
+    steps:
+    
+      - name: Checkout source code
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+          token: ${{ secrets.git_token }}
+          
+      - name: Set up JDK 21
+        id: setup-jdk
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          
+      - name: Check pom version
+        id: check-pom-version
+        uses: avides/actions-project-version-check@v1.3.0
+        with:
+          token: ${{ secrets.git_token }}
+          file-to-check: pom.xml
+          only-return-version: true
+          
+      - name: Use POM version from check
+        id: use-version-from-check
+        run:
+          echo "pom-version:" ${{steps.check-pom-version.outputs.version}}
+          
+      - name: Setup Maven package
+        id: setup-maven-package
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          repositories: '[{ "id": "github", "url": "${{ inputs.maven_pkg }}" }]'
+          servers: '[{ "id": "github", "username": "gekko-tech", "password": "${{ secrets.git_token }}" }]'
+
+      - name: Get Maven version
+        id: get_mvn_version
+        run: |
+          VERSION=$(mvn -v)
+          echo "maven version: $VERSION"
+
+      - name: Build with Maven
+        id: maven-build
+        run:
+          mvn -DskipTests clean install --file pom.xml
+          
+      - name: Export image
+        id: export-image
+        env: 
+          MICROSERVICE: ${{ inputs.repo }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          ls -lR ${{github.workspace}}
+          mkdir upload/
+          cp ${{github.workspace}}/target/${{env.MICROSERVICE}}-${{steps.check-pom-version.outputs.version}}.jar upload/${{env.MICROSERVICE}}-${{env.TAG}}.jar
+          
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+    
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.dh_username }}
+          password: ${{ secrets.dh_token }}
+
+      - name: Build, tag and push the image to DockerHub
+        id: build-image-service
+        env:
+          IMAGE_TAG: ${{ inputs.tag }}
+          DH_REGISTRY: ${{ secrets.dh_registry }}
+          DH_REPOSITORY: ${{ secrets.dh_repository }}
+        run : |
+          echo "Pushing image to DockerHub... $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG"
+          docker build -t $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG --pull=true --file=./Dockerfile ${{github.workspace}}
+          docker push $DH_REGISTRY/$DH_REPOSITORY:$IMAGE_TAG
+          
+          echo "image:$IMAGE_TAG"
+          echo "image=$IMAGE_TAG" >> $GITHUB_OUTPUT
